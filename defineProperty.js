@@ -1,35 +1,51 @@
-const dinner = {
-    meal: 'tacos'
+//  视图渲染函数
+function render () {
+    console.log('视图更新模拟')
+}
+
+// 需要侦测的对象
+const data = {
+    name: 'javyin',
+    age: 18
+}
+
+// 数据劫持
+observer(data)
+
+function observer (target) {
+    if (target == null || typeof target !== 'object') {
+        return target
+    }
+    for (let key in target) {
+        defineReactive(target, key, target[key])
+    }
 }
 
 function defineReactive (target, key, value) {
-    // observer -> if(value == 'object') -> defineReactive
-    // array -> Object.setPrototypeof
+    observer(value)     // 递归子属性
     Object.defineProperty(target, key, {
+        enumerable: true,   // 可枚举（可遍历）
+        configurable: true,     // 可配置（比如可以删除）
         get () {
-            console.log('meal被获取')
+            console.log('get ' + value)
             return value
         },
         set (newValue) {
             if (newValue !== value) {
-                console.log('meal被重新赋值')
-                //  updateView()  更新视图
+                observer(newValue)  //  如果赋值的是一个对象，也需要递归子属性
+                console.log('set ', newValue)
+                render()
                 value = newValue
             }
         }
     })
 }
 
-for (let key in dinner) {
-    defineReactive(dinner, key, dinner[key])
-}
-
-console.log('dinner.meal before set: ' + dinner.meal)
-
 // 重新赋相同的值
-dinner.meal = 'tacos'
+// data.age = 18
 
 // 重新赋新的值
-// dinner.meal = 'pizza'
+data.age = 20
 
-console.log('dinner.meal after set: ' + dinner.meal)
+// 获取属性
+data.name
